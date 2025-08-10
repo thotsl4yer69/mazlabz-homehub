@@ -1,0 +1,68 @@
+title: "MAZ HomeHub"
+subtitle: "Local dashboard"
+logo: "https://raw.githubusercontent.com/bastienwirtz/homer/main/public/logo.png"
+footer: "HomeHub"
+columns: 3
+theme: default
+links:
+  - name: Documentation
+    icon: fas fa-book
+    url: https://github.com/bastienwirtz/homer
+    target: _blank
+services:
+  - name: Essentials
+    icon: fas fa-th
+    items:
+      - name: StepDaddyLive
+        icon: fas fa-futbol
+        subtitle: Sports via WARP
+        url: /
+        target: _self
+      - name: Home Assistant
+        icon: fas fa-home
+        subtitle: Subpath with websockets
+        url: /hass/
+        target: _self
+      - name: HA-Bridge
+        icon: fas fa-lightbulb
+        subtitle: Hue emulator
+        url: /habridge/
+        target: _self
+      - name: Dashboard (this)
+        icon: fas fa-grip
+        url: /home/
+        target: _self
+  - name: Media
+    icon: fas fa-play
+    items:
+      - name: Spotify
+        icon: fab fa-spotify
+        url: /spotify/
+        target: _self
+      - name: YouTube
+        icon: fab fa-youtube
+        url: https://www.youtube.com/
+        target: _blank
+      - name: Plex
+        icon: fas fa-film
+        url: https://app.plex.tv/desktop
+        target: _blank
+  - name: Weather
+    icon: fas fa-cloud
+    items:
+      - name: Melbourne Wx
+        icon: fas fa-cloud-sun
+        type: iframe
+        url: https://wttr.in/Melbourne?format=4
+        target: _self
+  - name: Scanners
+    icon: fas fa-broadcast-tower
+    items:
+      - name: LiveATC YSSY
+        icon: fas fa-headset
+        url: https://www.liveatc.net/hlisten.php?mount=yssy1_twr
+        target: _blank
+      - name: LiveATC JFK Tower
+        icon: fas fa-headset
+        url: https://www.liveatc.net/hlisten.php?icao=kjfk&mount=kjfk_twr
+        target: _blank

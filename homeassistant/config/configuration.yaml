@@ -1,0 +1,65 @@
+﻿# Minimal HA config; complete onboarding in UI.
+homeassistant:
+  name: Home
+  time_zone: Australia/Melbourne
+  unit_system: metric
+
+# Permit reverse proxy
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+    - 10.0.0.0/8
+
+# StepDaddyLive streaming integration
+panel_iframe:
+  stepdaddylive:
+    title: "🏟️ Live Sports"
+    icon: mdi:television
+    url: "/step/"
+    require_admin: false
+
+# Enable required components
+default_config:
+
+# Live streaming sensors
+sensor:
+  - platform: template
+    sensors:
+      stepdaddylive_status:
+        friendly_name: "StepDaddyLive Status"
+        value_template: >
+          {% if states('sensor.stepdaddylive_health') == 'ok' %}
+            Online
+          {% else %}
+            Offline
+          {% endif %}
+        icon_template: >
+          {% if states('sensor.stepdaddylive_health') == 'ok' %}
+            mdi:television-play
+          {% else %}
+            mdi:television-off
+          {% endif %}
+
+# Camera integration for embedding streams
+camera:
+  - platform: generic
+    name: "ESPN Live"
+    still_image_url: "http://caddy:8080/step/api/stream/espn"
+    stream_source: "http://caddy:8080/step/api/stream/espn"
+  - platform: generic
+    name: "Fox Sports Live"
+    still_image_url: "http://caddy:8080/step/api/stream/fox"
+    stream_source: "http://caddy:8080/step/api/stream/fox"
+  - platform: generic
+    name: "NBC Sports Live"
+    still_image_url: "http://caddy:8080/step/api/stream/nbc"
+    stream_source: "http://caddy:8080/step/api/stream/nbc"
+
+# Lovelace UI automation
+lovelace:
+  mode: yaml
+  resources:
+    - url: /local/custom_ui.js
+      type: module

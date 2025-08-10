@@ -1,0 +1,114 @@
+title: Home Hub
+views:
+  - title: Dashboard
+    path: dashboard
+    icon: mdi:view-dashboard
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              # 🏠 Home Hub Control Center
+              Welcome to your smart home dashboard with integrated live sports streaming.
+          
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: sensor.stepdaddylive_status
+                name: "Live Sports"
+                icon: mdi:television-play
+                tap_action:
+                  action: navigate
+                  navigation_path: /step/
+              - type: button
+                name: "Plex Media"
+                icon: mdi:plex
+                tap_action:
+                  action: url
+                  url_path: /plex/
+              - type: button
+                name: "FreshRSS"
+                icon: mdi:rss
+                tap_action:
+                  action: url
+                  url_path: /rss/
+
+  - title: Live Sports
+    path: sports
+    icon: mdi:television-play
+    panel: true
+    cards:
+      - type: iframe
+        url: /step/
+        aspect_ratio: "16:9"
+
+  - title: Sports Channels
+    path: channels
+    icon: mdi:television
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              # 🏟️ Live Sports Channels
+              Click any channel below to start streaming
+          
+          - type: horizontal-stack
+            cards:
+              - type: picture
+                image: /local/images/espn_logo.png
+                title: "ESPN"
+                tap_action:
+                  action: url
+                  url_path: /step/api/stream/espn
+              - type: picture
+                image: /local/images/fox_logo.png
+                title: "Fox Sports"
+                tap_action:
+                  action: url
+                  url_path: /step/api/stream/fox
+              - type: picture
+                image: /local/images/nbc_logo.png
+                title: "NBC Sports"
+                tap_action:
+                  action: url
+                  url_path: /step/api/stream/nbc
+          
+          - type: entities
+            title: "Streaming Status"
+            entities:
+              - sensor.stepdaddylive_status
+          
+          - type: markdown
+            content: |
+              ### 🌐 Network Status
+              - **WARP Egress**: Active for censorship bypass
+              - **Proxy**: Caddy reverse proxy routing
+              - **Encryption**: TLS secured connections
+
+  - title: System
+    path: system
+    icon: mdi:cog
+    cards:
+      - type: entities
+        title: "Home Hub Services"
+        entities:
+          - sensor.stepdaddylive_status
+      
+      - type: markdown
+        content: |
+          # 🔧 System Information
+          
+          ## Active Services
+          - **Homer Dashboard**: Service discovery and links
+          - **Home Assistant**: Smart home automation 
+          - **StepDaddyLive**: Live sports streaming with WARP egress
+          - **Plex**: Media server and streaming
+          - **FreshRSS**: RSS feed aggregation
+          - **HABridge**: Philips Hue emulation for Alexa
+          
+          ## Network Architecture  
+          - **Reverse Proxy**: Caddy with automatic HTTPS
+          - **Isolation**: StepDaddyLive routed through WARP
+          - **Health Monitoring**: All services monitored
+          - **Data Root**: M:\homehub (Windows Docker Desktop)

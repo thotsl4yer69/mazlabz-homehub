@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spotify Now Playing</title>
+<style>
+  body {font-family: system-ui, sans-serif; margin: 2rem; max-width: 640px}
+  .btn {padding:.6rem 1rem; border:1px solid #ccc; border-radius:8px; cursor:pointer}
+  code {background:#f6f6f6; padding:.2rem .4rem; border-radius:4px}
+</style>
+</head>
+<body>
+<h1>Spotify Now Playing</h1>
+<div id="ui"></div>
+<script>
+const CLIENT_ID = (new URLSearchParams(location.search).get('client_id')) || (window.SPOTIFY_CLIENT_ID || '');
+const REDIRECT_URI = location.origin + '/spotify/';
+const SCOPE = 'user-read-currently-playing';
+const authUrl = 'https://accounts.spotify.com/authorize' +
+  `?client_id=${encodeURIComponent(CLIENT_ID)}` +
+  `&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+  `&scope=${encodeURIComponent(SCOPE)}`;
+
+function tokenFromHash() {
+  if (location.hash.startsWith('#')) {
+    const h = new URLSearchParams(location.hash.substring(1));
+    return h.get('access_token');
+  }
+  return null;
+}
+
+async function nowPlaying(tok) {
+  const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+    headers: { Authorization: 'Bearer ' + tok }
+  });
+  if (r.status === 204) return {text: 'Nothing playing.'};
+  if (!r.ok) throw new Error('API error ' + r.status);
+  const j = await r.json();
+  const art = j.item && j.item.album ? j.item.album.images[0].url : '';
+  const name = j.item ? j.item.name : 'Unknown';
+  const artist = j.item && j.item.artists ? j.item.artists.map(a=>a.name).join(', ') : '';
+  return {html: `<img src="${art}" alt="" style="width:128px;height:128px;border-radius:8px"><p><strong>${name}</strong><br>${artist}</p>`};
+}
+
+(async function init() {
+  const ui = document.getElementById('ui');
+  if (!CLIENT_ID) {
+    ui.innerHTML = `<p>Set <code>SPOTIFY_CLIENT_ID</code> in <code>.env</code>, then reload.</p>`;
+    return;
+  }
+  const tok = tokenFromHash();
+  if (!tok) {
+    ui.innerHTML = `<button class="btn" onclick="location.href='${authUrl}'">Connect Spotify</button>`;
+    return;
+  }
+  try {
+    const {html, text} = await nowPlaying(tok);
+    ui.innerHTML = html || `<p>${text}</p>`;
+  } catch (e) {
+    ui.innerHTML = `<p>Error: ${e.message}. Click <a href="${authUrl}">re-authorize</a>.</p>`;
+  }
+})();
+</script>
+</body>
+</html>

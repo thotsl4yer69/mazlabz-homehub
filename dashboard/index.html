@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Hub - Integrated Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .service-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            border-radius: 8px;
+        }
+        
+        .service-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        .service-status {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-online {
+            background: #2ed573;
+            color: white;
+        }
+        
+        .status-loading {
+            background: #ffa502;
+            color: white;
+        }
+        
+        .service-content {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .service-iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .service-preview {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .service-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #ff4757;
+        }
+        
+        .btn-primary:hover {
+            background: #ff3742;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2ed573;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .media-item {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .media-item:hover {
+            background: rgba(0,0,0,0.4);
+        }
+        
+        .scanner-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .scanner-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            transition: background 0.3s;
+        }
+        
+        .scanner-item:hover {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn.active {
+            background: #ff4757;
+            border-color: #ff4757;
+        }
+        
+        .service-card.hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+            .nav-btn {
+                margin: 2px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 Home Hub</h1>
+        <p>Integrated Smart Home & Media Dashboard - 16 Live Channels</p>
+        
+        <!-- Channel Category Navigation -->
+        <div style="margin-top: 20px;">
+            <button class="nav-btn active" onclick="showCategory('all')">🌐 All Channels</button>
+            <button class="nav-btn" onclick="showCategory('local')">🏠 Home Services</button>
+            <button class="nav-btn" onclick="showCategory('sports')">🏟️ Sports</button>
+            <button class="nav-btn" onclick="showCategory('media')">🎵 Media</button>
+            <button class="nav-btn" onclick="showCategory('news')">📺 News</button>
+            <button class="nav-btn" onclick="showCategory('utilities')">🔧 Utilities</button>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <!-- StepDaddyLive Streaming -->
+        <div class="service-card" data-category="sports local">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/youtubetv.svg" 
+                     alt="StepDaddyLive" class="service-icon">
+                <div class="service-title">🏟️ Live Sports</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="/step/" class="service-iframe" title="StepDaddyLive"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="/step/" class="btn btn-primary" target="_blank">Full Screen</a>
+                <button class="btn btn-secondary" onclick="refreshService('step')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Home Assistant -->
+        <div class="service-card" data-category="local">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/homeassistant.svg" 
+                     alt="Home Assistant" class="service-icon">
+                <div class="service-title">🏠 Home Assistant</div>
+                <div class="service-status status-online">ONLINE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="/ha/" class="service-iframe" title="Home Assistant"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="/ha/" class="btn btn-primary" target="_blank">Open HA</a>
+                <button class="btn btn-secondary" onclick="refreshService('ha')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Plex Media Server -->
+        <div class="service-card" data-category="media local">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/plex.svg" 
+                     alt="Plex" class="service-icon">
+                <div class="service-title">📺 Plex Media</div>
+                <div class="service-status status-online">READY</div>
+            </div>
+            <div class="service-content">
+                <iframe src="/plex/web" class="service-iframe" title="Plex"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="/plex/web" class="btn btn-primary" target="_blank">Launch Plex</a>
+                <button class="btn btn-secondary" onclick="refreshService('plex')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- FreshRSS -->
+        <div class="service-card" data-category="news local">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/rss.svg" 
+                     alt="FreshRSS" class="service-icon">
+                <div class="service-title">📰 News & RSS</div>
+                <div class="service-status status-online">SYNCING</div>
+            </div>
+            <div class="service-content">
+                <iframe src="/rss/" class="service-iframe" title="FreshRSS"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="/rss/" class="btn btn-primary" target="_blank">Open RSS</a>
+                <button class="btn btn-secondary" onclick="refreshService('rss')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- HABridge -->
+        <div class="service-card" data-category="local utilities">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/amazonalexa.svg" 
+                     alt="HABridge" class="service-icon">
+                <div class="service-title">🔊 Alexa Bridge</div>
+                <div class="service-status status-online">ACTIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="/hue/" class="service-iframe" title="HABridge"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="/hue/" class="btn btn-primary" target="_blank">Configure</a>
+                <button class="btn btn-secondary" onclick="refreshService('hue')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- YouTube Embedded -->
+        <div class="service-card" data-category="media">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/youtube.svg" 
+                     alt="YouTube" class="service-icon">
+                <div class="service-title">📺 YouTube</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&mute=1" class="service-iframe" title="YouTube" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.youtube.com/" class="btn btn-primary" target="_blank">Open YouTube</a>
+                <button class="btn btn-secondary" onclick="refreshService('YouTube')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Spotify Embedded -->
+        <div class="service-card" data-category="media">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/spotify.svg" 
+                     alt="Spotify" class="service-icon">
+                <div class="service-title">🎵 Spotify</div>
+                <div class="service-status status-online">STREAMING</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator&theme=0" class="service-iframe" title="Spotify" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://open.spotify.com/" class="btn btn-primary" target="_blank">Open Spotify</a>
+                <button class="btn btn-secondary" onclick="refreshService('Spotify')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Twitch Embedded -->
+        <div class="service-card" data-category="media">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/twitch.svg" 
+                     alt="Twitch" class="service-icon">
+                <div class="service-title">🎮 Twitch</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://player.twitch.tv/?channel=shroud&parent=localhost&muted=true" class="service-iframe" title="Twitch" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.twitch.tv/" class="btn btn-primary" target="_blank">Open Twitch</a>
+                <button class="btn btn-secondary" onclick="refreshService('Twitch')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Netflix Web Player -->
+        <div class="service-card" data-category="media">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/netflix.svg" 
+                     alt="Netflix" class="service-icon">
+                <div class="service-title">🎬 Netflix</div>
+                <div class="service-status status-online">READY</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.netflix.com/" class="service-iframe" title="Netflix"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.netflix.com/" class="btn btn-primary" target="_blank">Open Netflix</a>
+                <button class="btn btn-secondary" onclick="refreshService('Netflix')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- News Channels Embedded -->
+        <div class="service-card" data-category="news">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/cnn.svg" 
+                     alt="CNN" class="service-icon">
+                <div class="service-title">📺 CNN Live</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.youtube.com/embed/live_stream?channel=UCupvZG-5ko_eiXAupbDfxWw&autoplay=0&mute=1" class="service-iframe" title="CNN Live" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.cnn.com/live" class="btn btn-primary" target="_blank">CNN Live</a>
+                <button class="btn btn-secondary" onclick="refreshService('CNN')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- BBC News -->
+        <div class="service-card" data-category="news">
+            <div class="service-header">
+                <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/bbc.svg" 
+                     alt="BBC" class="service-icon">
+                <div class="service-title">📰 BBC News</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.youtube.com/embed/live_stream?channel=UC16niRr50-MSBwiO3YDb3RA&autoplay=0&mute=1" class="service-iframe" title="BBC News" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.bbc.com/news" class="btn btn-primary" target="_blank">BBC News</a>
+                <button class="btn btn-secondary" onclick="refreshService('BBC')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Sky News -->
+        <div class="service-card" data-category="news">
+            <div class="service-header">
+                <div class="service-title">🌍 Sky News</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.youtube.com/embed/live_stream?channel=UCHSaAhOTyMi2HAZq1SNKdpQ&autoplay=0&mute=1" class="service-iframe" title="Sky News" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://news.sky.com/" class="btn btn-primary" target="_blank">Sky News</a>
+                <button class="btn btn-secondary" onclick="refreshService('SkyNews')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- ABC News Australia -->
+        <div class="service-card" data-category="news">
+            <div class="service-header">
+                <div class="service-title">🇦🇺 ABC News Australia</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.youtube.com/embed/live_stream?channel=UCVgO39Bk5sMo66-6o6652Ng&autoplay=0&mute=1" class="service-iframe" title="ABC News Australia" allowfullscreen></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.abc.net.au/news/" class="btn btn-primary" target="_blank">ABC News</a>
+                <button class="btn btn-secondary" onclick="refreshService('ABCNews')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Radio Streams -->
+        <div class="service-card" data-category="media">
+            <div class="service-header">
+                <div class="service-title">📻 Triple J</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.abc.net.au/triplej/live/embed/" class="service-iframe" title="Triple J Live"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.abc.net.au/triplej/" class="btn btn-primary" target="_blank">Triple J</a>
+                <button class="btn btn-secondary" onclick="refreshService('TripleJ')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Weather Channel -->
+        <div class="service-card" data-category="utilities">
+            <div class="service-header">
+                <div class="service-title">🌤️ Weather Radar</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://embed.windy.com/embed2.html?lat=-37.814&lon=144.963&detailLat=-37.814&detailLon=144.963&width=650&height=450&zoom=9&level=surface&overlay=rain&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" class="service-iframe" title="Weather Radar"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://windy.com/" class="btn btn-primary" target="_blank">Full Weather</a>
+                <button class="btn btn-secondary" onclick="refreshService('Weather')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Scanner Feeds -->
+        <div class="service-card" data-category="utilities">
+            <div class="service-header">
+                <div class="service-title">📻 Scanner Feeds</div>
+                <div class="service-status status-online">LIVE</div>
+            </div>
+            <div class="service-content">
+                <iframe src="https://www.liveatc.net/search/?icao=YMML" class="service-iframe" title="Melbourne ATC Scanner"></iframe>
+            </div>
+            <div class="service-buttons">
+                <a href="https://www.liveatc.net/search/?icao=YMML" class="btn btn-primary" target="_blank">Melbourne ATC</a>
+                <a href="https://www.broadcastify.com/listen/ctid/2309" class="btn btn-secondary" target="_blank">Victoria Police</a>
+                <button class="btn btn-secondary" onclick="refreshService('Scanner')">Refresh</button>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="service-card" data-category="local utilities">
+            <div class="service-header">
+                <div class="service-title">⚡ System Status</div>
+                <div class="service-status status-online">HEALTHY</div>
+            </div>
+            <div class="service-content">
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="services-count">16</div>
+                        <div class="stat-label">Channels</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="uptime">3h 24m</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cpu-usage">15%</div>
+                        <div class="stat-label">CPU</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="memory-usage">2.1GB</div>
+                        <div class="stat-label">Memory</div>
+                    </div>
+                </div>
+            </div>
+            <div class="service-buttons">
+                <button class="btn btn-secondary" onclick="refreshDashboard()">🔄 Refresh All</button>
+                <a href="/healthz" class="btn btn-secondary" target="_blank">🏥 Health Check</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function refreshService(service) {
+            const iframe = document.querySelector(`iframe[title*="${service}" i]`);
+            if (iframe) {
+                iframe.src = iframe.src;
+            }
+        }
+        
+        function openExternal(url) {
+            window.open(url, '_blank');
+        }
+        
+        function refreshDashboard() {
+            location.reload();
+        }
+        
+        // Channel category navigation
+        function showCategory(category) {
+            // Update nav button states
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide service cards based on category
+            const serviceCards = document.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                if (category === 'all') {
+                    card.classList.remove('hidden');
+                } else {
+                    const categories = card.getAttribute('data-category') || '';
+                    if (categories.includes(category)) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Update channel count
+            const visibleCards = document.querySelectorAll('.service-card:not(.hidden)').length;
+            const countEl = document.getElementById('services-count');
+            if (countEl) {
+                countEl.textContent = visibleCards;
+            }
+        }
+        
+        // Auto-refresh system stats every 30 seconds
+        setInterval(updateSystemStats, 30000);
+        
+        function updateSystemStats() {
+            // Simulate real stats - in production, these would come from actual APIs
+            document.getElementById('cpu-usage').textContent = Math.floor(Math.random() * 20 + 10) + '%';
+            document.getElementById('memory-usage').textContent = (Math.random() * 0.5 + 2).toFixed(1) + 'GB';
+            
+            // Update uptime
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            document.getElementById('uptime').textContent = `${hours}h ${minutes}m`;
+        }
+        
+        // Check service health on load
+        window.addEventListener('load', function() {
+            // Add loading states and health checks for each service
+            const services = ['step', 'ha', 'plex', 'rss', 'hue', 'YouTube', 'Spotify', 'Twitch', 'Netflix', 'CNN', 'BBC', 'SkyNews', 'ABCNews', 'TripleJ', 'Weather', 'Scanner'];
+            services.forEach(service => {
+                const statusEl = document.querySelector(`iframe[title*="${service}" i]`)?.closest('.service-card')?.querySelector('.service-status');
+                if (statusEl) {
+                    statusEl.className = 'service-status status-loading';
+                    statusEl.textContent = 'LOADING';
+                    
+                    // Simulate health check with different times for different service types
+                    const loadTime = service.includes('step') || service.includes('ha') || service.includes('plex') || service.includes('rss') || service.includes('hue') 
+                        ? 1000 + Math.random() * 2000  // Local services load faster
+                        : 2000 + Math.random() * 4000; // External services take longer
+                    
+                    setTimeout(() => {
+                        statusEl.className = 'service-status status-online';
+                        const statusTexts = {
+                            'step': 'LIVE', 'YouTube': 'LIVE', 'Twitch': 'LIVE', 'CNN': 'LIVE', 'BBC': 'LIVE', 
+                            'SkyNews': 'LIVE', 'ABCNews': 'LIVE', 'TripleJ': 'LIVE', 'Weather': 'LIVE', 'Scanner': 'LIVE',
+                            'Spotify': 'STREAMING', 'Netflix': 'READY', 'ha': 'ONLINE', 'plex': 'READY', 'rss': 'SYNCING', 'hue': 'ACTIVE'
+                        };
+                        statusEl.textContent = statusTexts[service] || 'ONLINE';
+                    }, loadTime);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

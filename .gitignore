@@ -1,0 +1,10 @@
+﻿# ignore big/noisy or sensitive stuff
+homeassistant/config/home-assistant_v2.db*
+homeassistant/config/deps/
+homeassistant/config/.cloud/
+homeassistant/config/.storage/auth*
+_snapshots/
+wireproxy/wg0.conf
+.env
+*.zip
+*.log

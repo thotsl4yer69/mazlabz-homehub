@@ -1,0 +1,30 @@
+﻿{
+  "deviceDb": {
+    "devices": [
+      {
+        "name": "Desk Lamp",
+        "uniqueid": "00:11:22:33:44:55-1",
+        "type": "devicetype",
+        "mapType": "http",
+        "onUrl": "http://homeassistant:8123/api/services/light/turn_on",
+        "offUrl": "http://homeassistant:8123/api/services/light/turn_off",
+        "httpVerb": "POST",
+        "contentType": "application/json",
+        "httpHeaders": [
+          {
+            "name":"Authorization",
+            "value":"Bearer "
+          }
+        ],
+        "bodyOn":"{\"entity_id\":\"light.desk\"}",
+        "bodyOff":"{\"entity_id\":\"light.desk\"}",
+        "deviceState":"false"
+      }
+    ]
+  },
+  "settings": {
+    "serverPort": ,
+    "upnpStrict": true,
+    "upnpConfigAddress": ""
+  }
+}

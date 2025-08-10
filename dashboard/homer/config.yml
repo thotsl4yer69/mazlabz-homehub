@@ -1,0 +1,45 @@
+title: Home Hub
+subtitle: Fast lanes only
+logo: https://raw.githubusercontent.com/bastienwirtz/homer/main/public/logo.png
+columns: 3
+theme: default
+
+# Groups show as sections
+services:
+  - name: Core
+    items:
+      - name: Home Assistant
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/homeassistant.svg
+        url: /ha/
+      - name: HA-Bridge
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/amazonalexa.svg
+        url: /hue/
+      - name: StepDaddyLive
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/youtubetv.svg
+        url: /step/
+      - name: Plex
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/plex.svg
+        url: /plex/web
+      - name: FreshRSS
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/rss.svg
+        url: /rss/
+
+  - name: Media
+    items:
+      - name: Spotify
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/spotify.svg
+        url: https://open.spotify.com/
+      - name: YouTube
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/youtube.svg
+        url: https://www.youtube.com/
+
+  - name: Scanners
+    items:
+      - name: Melbourne ATC (YMML)
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/radio.svg
+        url: https://www.liveatc.net/search/?icao=YMML
+      - name: Victoria feeds
+        icon: https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/radiopublic.svg
+        url: https://www.broadcastify.com/listen/ctid/2309
+
+# Tip to self: add local SDR later via rtl_433 or SDRTrunk and link here.

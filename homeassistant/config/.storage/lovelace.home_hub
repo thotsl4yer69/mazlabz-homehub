@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.home_hub",
+  "data": {
+    "config": {
+      "title": "Home Hub",
+      "views": [
+        {
+          "title": "Hub",
+          "path": "home-hub",
+          "icon": "mdi:home-circle",
+          "cards": [
+            {
+              "type": "markdown",
+              "content": "# Home Hub\nSingle-page control. If a panel is blank, the app is down or still frame-busting.\n- Proxy: http://localhost:8080/healthz → **ok**\n- Step:  http://localhost:8080/step/healthz → **ok**\n"
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## Live Sports"
+                },
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/step/",
+                  "aspect_ratio": "56%"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "title": "Control Panels",
+              "columns": 2,
+              "square": false,
+              "cards": [
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/ha/",
+                  "aspect_ratio": "160%"
+                },
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/hue/",
+                  "aspect_ratio": "160%"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "title": "Content",
+              "columns": 2,
+              "square": false,
+              "cards": [
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/rss/",
+                  "aspect_ratio": "180%"
+                },
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/plex/web",
+                  "aspect_ratio": "180%"
+                }
+              ]
+            },
+            {
+              "type": "markdown",
+              "content": "## Media"
+            },
+            {
+              "type": "grid",
+              "columns": 2,
+              "square": false,
+              "cards": [
+                {
+                  "type": "iframe",
+                  "url": "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=0&mute=1",
+                  "aspect_ratio": "56%"
+                },
+                {
+                  "type": "iframe",
+                  "url": "https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M",
+                  "aspect_ratio": "56%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ops",
+          "path": "ops",
+          "icon": "mdi:server",
+          "cards": [
+            {
+              "type": "grid",
+              "columns": 2,
+              "square": false,
+              "cards": [
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/healthz",
+                  "aspect_ratio": "25%"
+                },
+                {
+                  "type": "iframe",
+                  "url": "http://localhost:8080/step/healthz",
+                  "aspect_ratio": "25%"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

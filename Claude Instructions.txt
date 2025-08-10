@@ -1,0 +1,136 @@
+Claude Instructions
+Core stack
+Single Windows-hosted hub on Docker Desktop (Linux engine), PowerShell for ops, everything under M:\homehub.
+
+One reverse proxy entry point with pretty paths and WebSocket support.
+
+A central dashboard as the front door.
+
+Apps routed via the dashboard/proxy
+Home Assistant (/ha)
+
+HA-Bridge for Hue emulation/Alexa control (/hue)
+
+StepDaddyLive front-end for live sports, forced through a censorship-bypass egress only for this app (/step)
+
+Plex (/plex or /plex/web)
+
+FreshRSS for weather/news/RSS (/rss)
+
+Launchers for Spotify and YouTube (web apps)
+
+Police/airband scanner links/players (at least two working public streams, note about adding local SDR later)
+
+Networking / proxy requirements
+Caddy or Nginx reverse proxy; must support WebSocket upgrades and clean subpaths.
+
+Prefer Caddy for easy/auto TLS when remote is enabled.
+
+User-friendly URL paths:
+
+/ → dashboard
+
+/ha → Home Assistant
+
+/hue → HA-Bridge
+
+/step → StepDaddyLive
+
+/rss → FreshRSS
+
+/plex → Plex
+
+Optional remote access via Cloudflare Tunnel (no port-forwarding).
+
+Censorship-bypass egress (only for StepDaddyLive)
+Containerized Cloudflare WARP/WireGuard egress.
+
+Policy routing so only StepDaddyLive’s traffic exits via WARP; everything else uses normal WAN.
+
+Verifiable egress IP from inside the StepDaddyLive container.
+
+Simple /healthz on StepDaddyLive so the proxy/compose can healthcheck it.
+
+Data, config, and secrets
+All configs, mounts, and secrets live under M:\homehub\… in a tidy tree.
+
+No hard-coded secrets; use .env for ports, TZ, PUID/PGID, tokens, paths.
+
+Persistent storage for all stateful services.
+
+Health, logging, ops
+Healthchecks on every service.
+
+Start order enforced with depends_on + health conditions.
+
+Logging that’s actually readable (container logs OK; nothing exotic demanded).
+
+Scripts to manage the stack:
+
+Bootstrap (create folders, write configs, bring up)
+
+Status summary
+
+Update (safe rolling recreate)
+
+Backup (tar configs to dated folder)
+
+Restore (idempotent)
+
+Nuke/rebuild
+
+Compose structure & style
+One Docker Compose file, well-commented, using profiles.
+
+Windows-friendly paths and line endings.
+
+Watchtower present but disabled by default, with clear instructions to enable safely.
+
+Optional Node-RED and MQTT broker under a disabled profile for future automations.
+
+Optional cloudflared tunnel under a disabled profile.
+
+Defaults & environment
+Assume host LAN IP 192.168.1.50, gateway 192.168.1.1 unless overridden.
+
+TZ everywhere: Australia/Melbourne.
+
+Default ports:
+
+Dashboard exposed on 8080 locally
+
+Everything else behind the proxy (internal/container ports only)
+
+Dashboard content
+Tiles for all services above with sensible icons.
+
+Quick-launch links for Spotify and YouTube.
+
+“Scanners” section with at least two working public streams.
+
+Note on adding local SDR later.
+
+HA-Bridge specifics
+Initial sample devices and HTTP endpoints that hit HA or simple webhooks so Alexa sees “lights” immediately.
+
+Discovery notes for Alexa and a quick test phrase.
+
+Tests & acceptance (you wanted explicit checks)
+Proxy up, dashboard reachable.
+
+HA loads and retains config after restart.
+
+HA-Bridge devices discoverable by Alexa.
+
+StepDaddyLive reachable at /step and confirms warped egress IP.
+
+Plex web opens.
+
+FreshRSS loads default feeds.
+
+All healthchecks stay healthy for 5 minutes.
+
+Migration
+A concise path to move the entire stack to a different Windows mini-PC with minimal pain (copy data tree, restore .env, bring up, reissue claim tokens if needed).
+
+There. That’s the shopping list you handed me, minus the drama.

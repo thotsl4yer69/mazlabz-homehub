@@ -1,0 +1,47 @@
+﻿{
+    email admin@example.invalid
+}
+
+:8080 {
+    encode gzip
+    respond /healthz 200
+
+    # General hardening-ish headers
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        # Add real_ip from LAN proxies if you ever chain them
+    }
+
+    # Timeouts
+    servers :8080 {
+        read_timeout 60s
+        write_timeout 60s
+        idle_timeout 120s
+    }
+
+    # Pretty paths
+    handle_path / {
+        reverse_proxy homer:8080
+    }
+
+    handle_path /ha* {
+        reverse_proxy homeassistant:8123
+    }
+
+    handle_path /hue* {
+        reverse_proxy habridge:8080
+    }
+
+    handle_path /step* {
+        reverse_proxy warp-egress:8000
+    }
+
+    handle_path /rss* {
+        reverse_proxy freshrss:80
+    }
+
+    handle_path /plex* {
+        reverse_proxy plex:32400
+    }
+}

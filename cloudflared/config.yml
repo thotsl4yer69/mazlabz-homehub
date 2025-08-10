@@ -1,0 +1,7 @@
+﻿# cloudflared config (optional, profile 'remote')
+tunnel: USE-TOKEN
+credentials-file: C:\\etc\\cloudflared\\DO_NOT_USE.json
+ingress:
+  - hostname: \
+    service: http://reverse-proxy:\
+  - service: http_status:404

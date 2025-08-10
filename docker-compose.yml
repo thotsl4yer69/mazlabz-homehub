@@ -1,0 +1,224 @@
+﻿name: maz-homehub
+
+services:
+  reverse-proxy:
+    image: caddy:2
+    container_name: caddy
+    # Serves everything on http://HOST:HTTP_PORT with pretty paths
+    environment:
+      - TZ=${TZ}
+    volumes:
+      # Caddyfile with path routing; we hardcode internal ports to avoid env-expansion weirdness
+      - '${DATA_ROOT}\proxy\Caddyfile:/etc/caddy/Caddyfile:ro'
+      - '${DATA_ROOT}\dashboard:/dashboard:ro'
+      - 'caddy_data:/data'
+      - 'caddy_config:/config'
+    ports:
+      - '${HTTP_PORT}:8080'
+    depends_on:
+      homeassistant:  { condition: service_healthy }
+      habridge:       { condition: service_healthy }
+      plex:           { condition: service_healthy }
+      warp-egress:    { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+    networks: [ hub ]
+
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer
+    environment:
+      - UID=${PUID}
+      - GID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}\dashboard\homer:/www/assets'
+    expose: [ "8080" ]
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}\homeassistant\config:/config'
+    expose: [ "8123" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:8123/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  habridge:
+    image: lscr.io/linuxserver/habridge:latest
+    container_name: habridge
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - JAVA_OPTS=-Dserver.port=${HABRIDGE_PORT}
+    volumes:
+      - '${DATA_ROOT}\habridge\data:/config'
+      # Note: LinuxServer stores config under /config. We placed habridge.config there already.
+    expose: [ "${HABRIDGE_PORT}" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:${HABRIDGE_PORT}/api/devices || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    environment:
+      - TZ=${TZ}
+      - CRON_MIN=15,45
+    volumes:
+      - 'freshrss_data:/var/www/FreshRSS/data'
+    expose: [ "80" ]
+    healthcheck:
+      # Use wget, not curl (image doesnâ€™t ship curl by default)
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+    volumes:
+      - '${DATA_ROOT}\plex\config:/config'
+      - '${DATA_ROOT}\plex\transcode:/transcode'
+      # Add media mounts as needed, e.g.:
+      # - 'D:\Media\Movies:/data/movies'
+      # - 'D:\Media\TV:/data/tv'
+    expose: [ "32400" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:32400/web/index.html || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+    networks: [ hub ]
+
+  # Cloudflare WARP egress; StepDaddyLive shares its network stack
+  warp-egress:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: warp-egress
+    cap_add: [ "NET_ADMIN", "SYS_MODULE" ]
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}\warp\config:/config'
+    healthcheck:
+      test: ["CMD-SHELL","wg show || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  stepdaddylive:
+    build:
+      context: '${DATA_ROOT}\stepdaddylive'
+      dockerfile: Dockerfile
+    container_name: stepdaddylive
+    environment:
+      - TZ=${TZ}
+      - PORT=${STEP_PORT}
+    # Temporarily use default network until WARP is properly configured
+    # network_mode: 'service:warp-egress'
+    expose: [ "${STEP_PORT}" ]
+    depends_on:
+      warp-egress: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:${STEP_PORT}/healthz || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 60
+    networks: [ hub ]
+
+  # Optional automations (off by default): enable with `--profile automation`
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    profiles: [ "automation" ]
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}\nodered\data:/data'
+    expose: [ "1880" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:1880/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 30
+    networks: [ hub ]
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    profiles: [ "automation" ]
+    volumes:
+      - '${DATA_ROOT}\mosquitto\config:/mosquitto/config'
+    expose: [ "1883" ]
+    healthcheck:
+      # $$ -> literal $ to avoid compose env-expanding $SYS
+      test: ["CMD-SHELL","mosquitto_sub -h 127.0.0.1 -t $$SYS/broker/uptime -C 1 -W 5 >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks: [ hub ]
+
+  # Optional remote access via Cloudflare Tunnel (off by default): `--profile remote`
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    profiles: [ "remote" ]
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
+    depends_on:
+      reverse-proxy: { condition: service_healthy }
+    networks: [ hub ]
+
+  # Optional updates (off by default): `--profile updates`
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    profiles: [ "updates" ]
+    command: --cleanup --rolling-restart --interval 86400 caddy homer homeassistant habridge freshrss plex warp-egress stepdaddylive
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    environment:
+      - TZ=${TZ}
+    networks: [ hub ]
+
+networks:
+  hub:
+
+volumes:
+  caddy_data:
+  caddy_config:
+  freshrss_data:

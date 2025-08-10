@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(docker exec:*)",
+      "Bash(mv:*)",
+      "Bash(timeout 30 docker-compose logs stepdaddylive --tail=10 -f)",
+      "Bash(mkdir:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker network inspect:*)",
+      "Bash(docker network connect:*)",
+      "Bash(docker inspect:*)"
+    ],
+    "deny": []
+  }
+}

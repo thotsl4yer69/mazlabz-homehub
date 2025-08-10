@@ -1,0 +1,67 @@
+﻿:8080 {
+    # Health for scripts/monitors
+    handle /healthz {
+        respond "ok" 200
+    }
+
+    # Home Assistant
+    handle_path /ha* {
+        header -X-Frame-Options
+        header -Content-Security-Policy
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy homeassistant:8123
+    }
+
+    # HA-Bridge
+    handle_path /hue* {
+        header -X-Frame-Options
+        header -Content-Security-Policy
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy habridge:8080
+    }
+
+    # StepDaddyLive (temporarily direct until WARP is configured)
+    handle_path /step* {
+        header -X-Frame-Options
+        header -Content-Security-Policy
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy stepdaddylive:8000
+    }
+
+    # FreshRSS
+    handle_path /rss* {
+        header -X-Frame-Options
+        header -Content-Security-Policy  
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy freshrss:80
+    }
+
+    # Plex Web
+    handle_path /plex* {
+        header -X-Frame-Options
+        header -Content-Security-Policy
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy plex:32400
+    }
+
+    # Homer Dashboard
+    handle_path /homer* {
+        header -X-Frame-Options
+        header -Content-Security-Policy
+        header X-Frame-Options "SAMEORIGIN"
+        reverse_proxy homer:8080
+    }
+    
+    # Dashboard static files
+    handle /dashboard* {
+        root * /dashboard
+        file_server
+    }
+    
+    # Root -> New integrated dashboard (catch-all, must be last)
+    handle /* {
+        root * /dashboard
+        try_files {path} /index.html
+        file_server
+    }
+}
