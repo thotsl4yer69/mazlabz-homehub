@@ -3,7 +3,7 @@ set -e
 
 echo "🧪 Testing Home Hub Demo Setup..."
 
-cd /home/runner/work/mazlabz-homehub/mazlabz-homehub
+cd "$(dirname "$0")"
 
 # Test 1: Check .env exists
 if [ -f ".env" ]; then
