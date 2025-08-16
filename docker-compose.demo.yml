@@ -1,0 +1,121 @@
+name: maz-homehub-demo
+
+services:
+  reverse-proxy:
+    image: caddy:2
+    container_name: caddy-demo
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}/proxy/Caddyfile:/etc/caddy/Caddyfile:ro'
+      - '${DATA_ROOT}/dashboard:/dashboard:ro'
+      - 'caddy_data:/data'
+      - 'caddy_config:/config'
+    ports:
+      - '${HTTP_PORT}:8080'
+    depends_on:
+      homeassistant:  { condition: service_healthy }
+      habridge:       { condition: service_healthy }
+      stepdaddylive:  { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks: [ hub ]
+
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer-demo
+    environment:
+      - UID=${PUID}
+      - GID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}/dashboard/homer:/www/assets'
+    expose: [ "8080" ]
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks: [ hub ]
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant-demo
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - '${DATA_ROOT}/homeassistant/config:/config'
+    expose: [ "8123" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:8123/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+    networks: [ hub ]
+
+  habridge:
+    image: lscr.io/linuxserver/habridge:latest
+    container_name: habridge-demo
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - JAVA_OPTS=-Dserver.port=${HABRIDGE_PORT}
+    volumes:
+      - '${DATA_ROOT}/habridge/data:/config'
+    expose: [ "${HABRIDGE_PORT}" ]
+    healthcheck:
+      - JAVA_OPTS=-Dserver.port=8085
+    volumes:
+      - '${DATA_ROOT}/habridge/data:/config'
+    expose: [ "8085" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:8085/api/devices || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+    networks: [ hub ]
+
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss-demo
+    environment:
+      - TZ=${TZ}
+      - CRON_MIN=15,45
+    volumes:
+      - 'freshrss_data:/var/www/FreshRSS/data'
+    expose: [ "80" ]
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+    networks: [ hub ]
+
+  # Simplified StepDaddyLive without WARP dependency for demo
+  stepdaddylive:
+    build:
+      context: '${DATA_ROOT}/stepdaddylive'
+      dockerfile: Dockerfile
+    container_name: stepdaddylive-demo
+    environment:
+      - TZ=${TZ}
+      - PORT=${STEP_PORT}
+    expose: [ "${STEP_PORT}" ]
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:${STEP_PORT}/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks: [ hub ]
+
+networks:
+  hub:
+
+volumes:
+  caddy_data:
+  caddy_config:
+  freshrss_data:
