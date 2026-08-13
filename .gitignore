@@ -1,10 +1,30 @@
-﻿# ignore big/noisy or sensitive stuff
+# HomeHub — generated, local and sensitive files
+
+# Local environment / credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Home Assistant runtime/private state
 homeassistant/config/home-assistant_v2.db*
 homeassistant/config/deps/
 homeassistant/config/.cloud/
 homeassistant/config/.storage/auth*
-_snapshots/
+homeassistant/config/secrets.yaml
+
+# VPN / tunnel local configuration
 wireproxy/wg0.conf
-.env
+
+# Generated backups / archives / logs
+_snapshots/
+*.bak
 *.zip
 *.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
